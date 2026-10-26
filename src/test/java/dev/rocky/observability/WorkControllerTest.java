@@ -6,10 +6,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class WorkControllerTest {
     @Test void recordsRequestTimer() {
-        try (SimpleMeterRegistry registry = new SimpleMeterRegistry()) {
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
+        try {
             var controller = new ObservabilityApplication.WorkController(registry);
             assertEquals("ok", controller.work());
             assertEquals(1, registry.get("demo.work.latency").timer().count());
+        } finally {
+            registry.close();
         }
     }
 }
