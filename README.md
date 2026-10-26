@@ -1,19 +1,40 @@
 # Spring Boot Performance & Observability
 
-> Work in progress — project scaffold and examples are being developed. This README does not claim implementation or passing tests yet.
+Java 17 examples for interpreting latency and saturation signals.
 
-## Purpose
+## Run
 
-Actuator, Micrometer, JVM GC/thread-pool metrics, latency, saturation, dashboards, and load-test scenarios.
+```bash
+mvn clean verify
+```
 
-## Planned quality bar
+## Implemented
 
-- Java 17+ and Maven; Spring Boot where relevant.
-- Focused, runnable code examples and JUnit 5 tests.
-- Integration tests for external dependencies where applicable.
-- GitHub Actions build and test workflow.
-- Architecture diagrams, setup instructions, design tradeoffs, and interview discussion prompts.
+- `LatencyTracker` aggregates request count, total elapsed nanoseconds, and maximum latency using concurrent accumulators.
+- JUnit 5 checks empty values, concurrent recording, average and maximum latency.
+- GitHub Actions Maven verification workflow.
 
-## Status
+## Data flow
 
-Initial project scope documented. Code, tests, and CI are **not yet implemented**.
+```mermaid
+flowchart LR
+  R[Completed request] --> T[LatencyTracker.record]
+  T --> C[LongAdder count]
+  T --> N[LongAdder total nanos]
+  T --> M[LongAccumulator max]
+  C --> S[Approximate concurrent snapshots]
+  N --> S
+  M --> S
+```
+
+`averageNanos()` uses separate concurrent snapshots and is **not** a consistent atomic snapshot while writes are in progress. This lightweight sample does not calculate p95/p99; production latency distributions require Micrometer timers/histograms.
+
+## Next implementation milestones
+
+- Spring Boot Actuator, Micrometer HTTP/JVM/thread-pool metrics.
+- Prometheus scrape endpoint, example dashboard and alert thresholds.
+- Reproducible saturation/load tests and database latency troubleshooting.
+
+## Interview prompts
+
+Why does a good average latency not rule out a poor p99? Which metrics distinguish JVM GC pauses from thread-pool or database saturation?
