@@ -3,6 +3,9 @@ management:
     web:
       exposure:
         include: health,info,prometheus,metrics
+  endpoint:
+    prometheus:
+      access: unrestricted
   metrics:
     distribution:
       percentiles-histogram:
