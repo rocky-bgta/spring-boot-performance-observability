@@ -20,7 +20,7 @@ class PrometheusEndpointIntegrationTest {
         assertEquals("ok", http.getForObject(base + "/work", String.class));
         ResponseEntity<String> response =
             http.getForEntity(base + "/actuator/prometheus", String.class);
-        assertTrue(response.getStatusCode().is2xxSuccessful());
+        assertTrue(response.getStatusCode().is2xxSuccessful(), "Prometheus scrape returned " + response.getStatusCode() + ": " + response.getBody());
         String metrics = response.getBody();
         assertNotNull(metrics);
         assertTrue(metrics.contains("demo_work_latency_seconds_count"), metrics);
